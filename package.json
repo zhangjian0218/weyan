@@ -1,0 +1,25 @@
+{
+  "name": "weyan-vue",
+  "version": "1.0.0",
+  "private": true,
+  "description": "微言 —— Vue 3 + Pinia 版极简本地化内容社区",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "pinia": "^3.0.1",
+    "vue": "^3.5.13"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.2.1",
+    "@vue/test-utils": "^2.4.0",
+    "jsdom": "^25.0.1",
+    "vite": "^6.0.0",
+    "vitest": "^3.0.0"
+  }
+}

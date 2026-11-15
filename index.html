@@ -4,34 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>微言 · 分享你的此刻</title>
-  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <main class="container">
-    <header class="header">
-      <h1>微言</h1>
-      <p class="slogan">分享你的此刻</p>
-    </header>
-
-    <!-- 发布区 -->
-    <section class="composer">
-      <textarea id="contentInput" maxlength="280" rows="3"
-        placeholder="有什么新鲜事想告诉大家？"></textarea>
-      <div class="composer-footer">
-        <span id="charCount" class="char-count">0 / 280</span>
-        <button id="publishBtn" class="btn-publish">发布</button>
-      </div>
-      <p id="toast" class="toast" hidden></p>
-    </section>
-
-    <!-- 时间线 -->
-    <section class="feed">
-      <h2 class="feed-title">时间线</h2>
-      <ul id="feedList" class="feed-list"></ul>
-      <p id="emptyTip" class="empty-tip">还没有内容，发一条试试吧～</p>
-    </section>
-  </main>
-
-  <script src="app.js"></script>
+  <div id="app"></div>
+  <script type="module" src="/src/main.js"></script>
 </body>
 </html>
