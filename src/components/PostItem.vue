@@ -8,6 +8,20 @@
     </div>
     <div class="post-content">{{ post.content }}</div>
     <div class="post-actions">
+      <button
+        class="btn-like"
+        :class="{ liked: post.liked }"
+        @click="store.toggleLike(post.id)"
+      >
+        {{ post.liked ? "♥ 已点赞" : "♡ 点赞" }}
+      </button>
+      <button
+        class="btn-favorite"
+        :class="{ favorited: post.favorited }"
+        @click="store.toggleFavorite(post.id)"
+      >
+        {{ post.favorited ? "★ 已收藏" : "☆ 收藏" }}
+      </button>
       <button class="btn-delete" @click="store.remove(post.id)">删除</button>
     </div>
   </li>

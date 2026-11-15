@@ -58,4 +58,65 @@ describe("PostList 组件", () => {
     await wrapper.vm.$nextTick();
     expect(wrapper.text()).toContain("响应式新内容");
   });
+
+  /* ---------- 筛选 Tab ---------- */
+
+  it("渲染全部/已点赞/已收藏三个筛选 Tab，默认选中全部", () => {
+    const wrapper = mountList();
+    const tabs = wrapper.findAll(".filter-tab");
+    expect(tabs).toHaveLength(3);
+    expect(tabs.map((t) => t.text())).toEqual(["全部", "已点赞", "已收藏"]);
+    expect(tabs[0].classes()).toContain("active");
+    expect(tabs[1].classes()).not.toContain("active");
+  });
+
+  it("点击已点赞 Tab 后列表只显示已点赞内容", async () => {
+    const wrapper = mountList();
+    const store = usePostsStore();
+    store.publish("A");
+    store.publish("B");
+    store.toggleLike(store.posts[0].id); // B 被点赞
+    await wrapper.vm.$nextTick();
+
+    await wrapper.findAll(".filter-tab")[1].trigger("click");
+    await wrapper.vm.$nextTick();
+
+    const texts = wrapper.findAll(".post").map((p) => p.text());
+    expect(texts).toHaveLength(1);
+    expect(texts[0]).toContain("B");
+    expect(wrapper.findAll(".filter-tab")[1].classes()).toContain("active");
+    expect(wrapper.findAll(".filter-tab")[0].classes()).not.toContain("active");
+  });
+
+  it("点击已收藏 Tab 后列表只显示已收藏内容", async () => {
+    const wrapper = mountList();
+    const store = usePostsStore();
+    store.publish("A");
+    store.publish("B");
+    store.toggleFavorite(store.posts[1].id); // A 被收藏
+    await wrapper.vm.$nextTick();
+
+    await wrapper.findAll(".filter-tab")[2].trigger("click");
+    await wrapper.vm.$nextTick();
+
+    const texts = wrapper.findAll(".post").map((p) => p.text());
+    expect(texts).toHaveLength(1);
+    expect(texts[0]).toContain("A");
+  });
+
+  it("筛选后再切回全部，恢复显示所有内容", async () => {
+    const wrapper = mountList();
+    const store = usePostsStore();
+    store.publish("A");
+    store.publish("B");
+    await wrapper.vm.$nextTick();
+
+    await wrapper.findAll(".filter-tab")[1].trigger("click"); // 已点赞（空）
+    await wrapper.vm.$nextTick();
+    expect(wrapper.findAll(".post")).toHaveLength(0);
+
+    await wrapper.findAll(".filter-tab")[0].trigger("click"); // 全部
+    await wrapper.vm.$nextTick();
+    expect(wrapper.findAll(".post")).toHaveLength(2);
+  });
 });

@@ -102,10 +102,43 @@ body {
   margin-top: 24px;
 }
 
-.feed-title {
-  font-size: 18px;
+.feed-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   margin-bottom: 12px;
   padding-left: 4px;
+}
+
+.feed-title {
+  font-size: 18px;
+}
+
+.filter-tabs {
+  display: flex;
+  gap: 6px;
+}
+
+.filter-tab {
+  background: #fff;
+  border: 1px solid #e4e6eb;
+  border-radius: 16px;
+  padding: 5px 14px;
+  font-size: 13px;
+  color: #65676b;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.filter-tab:hover {
+  background: #f0f2f5;
+}
+
+.filter-tab.active {
+  background: #1877f2;
+  border-color: #1877f2;
+  color: #fff;
+  font-weight: 600;
 }
 
 .feed-list {
@@ -170,6 +203,39 @@ body {
   margin-top: 12px;
   display: flex;
   justify-content: flex-end;
+  gap: 6px;
+}
+
+.btn-like,
+.btn-favorite {
+  background: none;
+  border: none;
+  color: #8a8d91;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 4px 10px;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.btn-like:hover {
+  color: #e0245e;
+  background: #fbe9ec;
+}
+
+.btn-like.liked {
+  color: #e0245e;
+  font-weight: 600;
+}
+
+.btn-favorite:hover {
+  color: #d4a017;
+  background: #fdf6e3;
+}
+
+.btn-favorite.favorited {
+  color: #d4a017;
+  font-weight: 600;
 }
 
 .btn-delete {
