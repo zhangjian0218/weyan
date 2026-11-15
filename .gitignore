@@ -7,3 +7,4 @@ coverage/
 .codebuddy/
 home.yaml
 s*.yaml
+h*.yaml
