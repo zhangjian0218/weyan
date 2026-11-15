@@ -9,18 +9,36 @@
 - [x] 发布内容：280 字上限、实时字数统计、空内容/超限校验与错误提示
 - [x] 查看时间线：按发布时间倒序的响应式卡片流，含头像、昵称、相对时间
 - [x] 删除内容：单条删除，列表与 localStorage 同步更新
-- [x] Local Storage 持久化：刷新/关闭浏览器后数据不丢失，损坏数据自动容错
+- [x] **点赞**：单条内容切换点赞（♡/♥），状态持久化
+- [x] **收藏**：单条内容切换收藏（☆/★），状态持久化
+- [x] **筛选 Tab**：全部 / 已点赞 / 已收藏，基于 store getter `filteredPosts`
+- [x] Local Storage 持久化：刷新/关闭浏览器后数据不丢失，损坏数据自动容错，旧数据自动回填点赞/收藏字段
 - [x] 快捷键：Ctrl + Enter 快速发布
 - [x] 原始纯 HTML/CSS/JS 版本保留在 `vanilla/` 目录
 
-## 测试覆盖（Vitest + @vue/test-utils，23 个用例）
+## 开发流程（Git Worktree 并行 + 子 Agent 审查）
+
+点赞/收藏功能采用并行分支开发，接口契约见 `docs/contract.md`：
+
+```
+feature/like-favorite ──┬── feature/lf-core（store 数据层：点赞/收藏/筛选）
+                        └── feature/lf-ui （组件层：切换按钮/筛选 Tab/样式）
+```
+
+- 两条分支在独立 Git Worktree 中开发，按契约的文件所有权划分避免冲突
+- 各分支 TDD 红绿循环完成后合并回 `feature/like-favorite`
+- 两个子 Agent（code-explorer）并行审查 core / ui 分支
+- 合并后统一运行全部测试与构建，浏览器实际操作验收
+
+## 测试覆盖（Vitest + @vue/test-utils，43 个用例）
 
 | 层 | 文件 | 用例 |
 | --- | --- | --- |
-| Store | `src/stores/posts.test.js` | 发布/排序/持久化、空白校验、280 字上限、删除、load 恢复、损坏数据容错（9 个） |
+| Store | `src/stores/posts.test.js` | 发布/排序/持久化、空白校验、280 字上限、删除、load 恢复、损坏数据容错、点赞/收藏切换、旧数据回填、筛选（19 个） |
 | 工具 | `src/utils/time.test.js` | 相对时间格式化边界（4 个） |
 | 组件 | `src/components/Composer.test.js` | 渲染、按钮禁用、字数联动、点击/快捷键发布、错误提示（6 个） |
-| 组件 | `src/components/PostList.test.js` | 空提示、渲染卡片、点击删除、响应式更新（4 个） |
+| 组件 | `src/components/PostList.test.js` | 空提示、渲染卡片、点击删除、响应式更新、筛选 Tab 渲染与切换（8 个） |
+| 组件 | `src/components/PostItem.test.js` | 按钮渲染、激活态、点赞/收藏切换调用（6 个） |
 
 ## 运行方式
 

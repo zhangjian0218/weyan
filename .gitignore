@@ -3,3 +3,7 @@ dist/
 coverage/
 *.log
 .worktrees/
+.playwright-cli/
+.codebuddy/
+home.yaml
+s*.yaml
