@@ -16,5 +16,9 @@ import PostList from "./components/PostList.vue";
 import { usePostsStore } from "./stores/posts";
 
 const store = usePostsStore();
-onMounted(() => store.load());
+onMounted(() => {
+  store.load().catch(() => {
+    // 后端不可用时保持空列表，避免未处理的 Promise rejection
+  });
+});
 </script>

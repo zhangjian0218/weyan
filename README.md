@@ -1,8 +1,39 @@
-# 微言（WeYan）—— 极简本地化内容社区
+# 微言（WeYan）—— 极简内容社区（前后端分离）
 
-一个使用 **Vue 3 + Pinia + Vite** 实现的极简社交内容发布应用，数据通过浏览器 Local Storage 本地化存储，无后端、无外部服务。
+前端使用 **Vue 3 + Pinia + Vite**，后端使用 **Hono（Node.js）+ RESTful API + 内存存储**，数据不再依赖浏览器 Local Storage。
 
-> 采用 **TDD（测试驱动开发）** 方式开发：先写测试（红灯）→ 实现功能（绿灯），共 23 个单元测试。
+> 采用 **TDD（测试驱动开发）** 方式开发：先写测试（红灯）→ 实现功能（绿灯），共 56 个单元测试。
+
+## 架构
+
+```
+浏览器 (Vue 3 + Pinia)
+   │  fetch /api/*（开发环境由 Vite 代理 → localhost:3000）
+Hono 后端 (Node.js)
+   │  server/app.js  RESTful 路由
+   │  server/store.js 内存存储（进程内数组，重启即清空）
+```
+
+RESTful API 契约见 `docs/api-contract.md`：
+
+| 方法 | 路径 | 说明 |
+| --- | --- | --- |
+| GET | `/api/posts` | 列表（时间倒序） |
+| POST | `/api/posts` | 创建（400 校验失败） |
+| PATCH | `/api/posts/:id` | 设置点赞/收藏（404 不存在） |
+| DELETE | `/api/posts/:id` | 删除（204 / 404） |
+
+## 运行方式
+
+```bash
+npm install
+npm run server   # 启动 Hono 后端 http://localhost:3000（同时托管 dist/）
+npm run dev      # 启动前端开发服务器 http://localhost:5173（/api 代理到 3000）
+npm test         # 运行 56 个测试
+npm run build    # 生产构建（后端可静态托管 dist/）
+```
+
+> 注意：内存存储意味着后端重启后数据清空（符合"内存存储"需求）。
 
 ## 功能清单
 

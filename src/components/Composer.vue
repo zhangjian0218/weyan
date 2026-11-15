@@ -35,9 +35,9 @@ function showToast(msg, isError = true) {
   toastTimer = setTimeout(() => (toast.value = ""), 2000);
 }
 
-function submit() {
+async function submit() {
   try {
-    store.publish(draft.value);
+    await store.publish(draft.value);
     draft.value = "";
     showToast("发布成功", false);
   } catch (e) {

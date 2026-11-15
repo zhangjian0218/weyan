@@ -1,20 +1,16 @@
-import { describe, it, expect, beforeEach } from "vitest";
-import { mount } from "@vue/test-utils";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { mount, flushPromises } from "@vue/test-utils";
 import { createPinia, setActivePinia } from "pinia";
 import PostItem from "./PostItem.vue";
 import { usePostsStore } from "../stores/posts";
+import { mockApi, samplePost } from "../test-utils/api-mock";
 
-/**
- * 先在 store 中发布一条内容，再用 store 中的 post 对象挂载组件，
- * 保证组件与测试共享同一数据源。
- * renderOnly: 直接用覆写后的对象渲染（用于激活态样式检查）
- */
 function mountItem(over = {}, renderOnly = false) {
   const pinia = createPinia();
   setActivePinia(pinia);
   const store = usePostsStore();
-  store.publish("你好");
-  const post = renderOnly ? { ...store.posts[0], ...over } : store.posts[0];
+  const post = renderOnly ? { ...samplePost(), ...over } : samplePost();
+  mockApi([post]);
   const wrapper = mount(PostItem, {
     props: { post },
     global: { plugins: [pinia] },
@@ -23,7 +19,8 @@ function mountItem(over = {}, renderOnly = false) {
 }
 
 describe("PostItem 组件", () => {
-  beforeEach(() => localStorage.clear());
+  beforeEach(() => mockApi());
+  afterEach(() => vi.unstubAllGlobals());
 
   it("渲染点赞与收藏两个切换按钮", () => {
     const { wrapper } = mountItem();
@@ -45,24 +42,24 @@ describe("PostItem 组件", () => {
     expect(wrapper.find(".btn-favorite").classes()).toContain("favorited");
   });
 
-  it("点击点赞按钮调用 store.toggleLike", async () => {
+  it("点击点赞按钮经 API 切换点赞状态", async () => {
     const { wrapper, store } = mountItem();
+    await store.load();
+    await flushPromises();
     await wrapper.find(".btn-like").trigger("click");
+    await flushPromises();
     expect(store.posts[0].liked).toBe(true);
-    expect(JSON.parse(localStorage.getItem("weyan_posts"))[0].liked).toBe(true);
-  });
-
-  it("点击收藏按钮调用 store.toggleFavorite", async () => {
-    const { wrapper, store } = mountItem();
-    await wrapper.find(".btn-favorite").trigger("click");
-    expect(store.posts[0].favorited).toBe(true);
-    expect(JSON.parse(localStorage.getItem("weyan_posts"))[0].favorited).toBe(true);
-  });
-
-  it("点赞后再次点击取消点赞（切换语义）", async () => {
-    const { wrapper, store } = mountItem();
     await wrapper.find(".btn-like").trigger("click");
-    await wrapper.find(".btn-like").trigger("click");
+    await flushPromises();
     expect(store.posts[0].liked).toBe(false);
+  });
+
+  it("点击收藏按钮经 API 切换收藏状态", async () => {
+    const { wrapper, store } = mountItem();
+    await store.load();
+    await flushPromises();
+    await wrapper.find(".btn-favorite").trigger("click");
+    await flushPromises();
+    expect(store.posts[0].favorited).toBe(true);
   });
 });

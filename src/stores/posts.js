@@ -1,22 +1,33 @@
 import { defineStore } from "pinia";
 
-export const STORAGE_KEY = "weyan_posts";
 export const MAX_LEN = 280;
 export const DEFAULT_USER = "小言";
 
 export const FILTERS = ["all", "liked", "favorited"];
 
-function createId() {
-  return Date.now() + Math.random().toString(16).slice(2, 8);
-}
+/** 进行中的 toggle 请求 id 集合（模块级，非响应式） */
+const pendingToggles = new Set();
 
-/** 对单条内容回填点赞/收藏默认值（兼容旧数据） */
-function withDefaults(post) {
-  return {
-    liked: false,
-    favorited: false,
-    ...post,
-  };
+async function request(url, options = {}) {
+  const res = await fetch(url, {
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
+    ...options,
+  });
+  if (!res.ok) {
+    let message = `请求失败（${res.status}）`;
+    try {
+      const data = await res.json();
+      if (data?.error) message = data.error;
+    } catch {
+      /* 204 等无 body 响应 */
+    }
+    const err = new Error(message);
+    err.status = res.status;
+    throw err;
+  }
+  if (res.status === 204) return null;
+  return res.json();
 }
 
 export const usePostsStore = defineStore("posts", {
@@ -26,7 +37,6 @@ export const usePostsStore = defineStore("posts", {
   }),
 
   getters: {
-    count: (state) => state.posts.length,
     likedPosts: (state) => state.posts.filter((p) => p.liked),
     favoritedPosts: (state) => state.posts.filter((p) => p.favorited),
     likedCount() {
@@ -43,66 +53,67 @@ export const usePostsStore = defineStore("posts", {
   },
 
   actions: {
-    /** 从 localStorage 恢复数据（容错 + 旧数据字段回填） */
-    load() {
-      try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        const data = raw ? JSON.parse(raw) : [];
-        this.posts = Array.isArray(data) ? data.map(withDefaults) : [];
-      } catch {
-        this.posts = [];
-      }
+    /** 从后端拉取列表（时间倒序） */
+    async load() {
+      const data = await request("/api/posts");
+      this.posts = Array.isArray(data?.posts) ? data.posts : [];
     },
 
-    /** 发布内容：校验 → 插入最前 → 持久化 */
-    publish(content) {
-      const text = (content ?? "").trim();
-      if (!text) {
-        throw new Error("内容不能为空");
-      }
-      if (text.length > MAX_LEN) {
-        throw new Error(`超出 ${MAX_LEN} 字上限`);
-      }
-      this.posts.unshift({
-        id: createId(),
-        user: DEFAULT_USER,
-        content: text,
-        time: Date.now(),
-        liked: false,
-        favorited: false,
+    /** 发布内容：服务端校验并创建，成功后插入本地列表最前 */
+    async publish(content) {
+      const data = await request("/api/posts", {
+        method: "POST",
+        body: JSON.stringify({ content: (content ?? "").trim() }),
       });
-      this.persist();
+      this.posts.unshift(data.post);
     },
 
-    /** 按 id 删除并持久化 */
-    remove(id) {
+    /** 删除内容（不存在的 id 静默容错） */
+    async remove(id) {
+      try {
+        await request(`/api/posts/${id}`, { method: "DELETE" });
+      } catch (e) {
+        if (e.status !== 404) throw e;
+        return;
+      }
       this.posts = this.posts.filter((p) => p.id !== id);
-      this.persist();
     },
 
-    /** 切换点赞并持久化 */
-    toggleLike(id) {
+    /** 切换点赞（in-flight 守卫防止双击竞态） */
+    async toggleLike(id) {
       const post = this.posts.find((p) => p.id === id);
-      if (!post) return;
-      post.liked = !post.liked;
-      this.persist();
+      if (!post || pendingToggles.has(id)) return;
+      pendingToggles.add(id);
+      try {
+        const data = await request(`/api/posts/${id}`, {
+          method: "PATCH",
+          body: JSON.stringify({ liked: !post.liked }),
+        });
+        Object.assign(post, data.post);
+      } finally {
+        pendingToggles.delete(id);
+      }
     },
 
-    /** 切换收藏并持久化 */
-    toggleFavorite(id) {
+    /** 切换收藏（in-flight 守卫防止双击竞态） */
+    async toggleFavorite(id) {
       const post = this.posts.find((p) => p.id === id);
-      if (!post) return;
-      post.favorited = !post.favorited;
-      this.persist();
+      if (!post || pendingToggles.has(id)) return;
+      pendingToggles.add(id);
+      try {
+        const data = await request(`/api/posts/${id}`, {
+          method: "PATCH",
+          body: JSON.stringify({ favorited: !post.favorited }),
+        });
+        Object.assign(post, data.post);
+      } finally {
+        pendingToggles.delete(id);
+      }
     },
 
     /** 设置筛选；非法值回退 all */
     setFilter(filter) {
       this.filter = FILTERS.includes(filter) ? filter : "all";
-    },
-
-    persist() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(this.posts));
     },
   },
 });

@@ -1,0 +1,39 @@
+- main [ref=e3]:
+  - generic [ref=e4]:
+    - heading "微言" [level=1] [ref=e5]
+    - paragraph [ref=e6]: 分享你的此刻
+  - generic [ref=e7]:
+    - textbox "有什么新鲜事想告诉大家？" [ref=e8]
+    - generic [ref=e9]:
+      - generic [ref=e10]: 0 / 280
+      - button "发布" [disabled] [ref=e11]
+  - generic [ref=e12]:
+    - generic [ref=e13]:
+      - heading "时间线" [level=2] [ref=e14]
+      - generic [ref=e15]:
+        - button "全部" [ref=e16] [cursor=pointer]
+        - button "已点赞" [ref=e17] [cursor=pointer]
+        - button "已收藏" [ref=e18] [cursor=pointer]
+    - list [ref=e21]:
+      - listitem [ref=e33]:
+        - generic [ref=e34]:
+          - generic [ref=e35]:
+            - generic [ref=e36]: 小
+            - text: 小言
+          - generic [ref=e37]: 刚刚
+        - generic [ref=e38]: API 版第二条
+        - generic [ref=e39]:
+          - button "♥ 已点赞" [ref=e43] [cursor=pointer]
+          - button "☆ 收藏" [ref=e41] [cursor=pointer]
+          - button "删除" [ref=e42] [cursor=pointer]
+      - listitem [ref=e22]:
+        - generic [ref=e23]:
+          - generic [ref=e24]:
+            - generic [ref=e25]: 小
+            - text: 小言
+          - generic [ref=e26]: 刚刚
+        - generic [ref=e27]: API 版第一条
+        - generic [ref=e28]:
+          - button "♡ 点赞" [ref=e29] [cursor=pointer]
+          - button "★ 已收藏" [active] [ref=e44] [cursor=pointer]
+          - button "删除" [ref=e31] [cursor=pointer]

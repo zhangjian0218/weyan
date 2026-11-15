@@ -11,18 +11,18 @@
       <button
         class="btn-like"
         :class="{ liked: post.liked }"
-        @click="store.toggleLike(post.id)"
+        @click="onLike"
       >
         {{ post.liked ? "♥ 已点赞" : "♡ 点赞" }}
       </button>
       <button
         class="btn-favorite"
         :class="{ favorited: post.favorited }"
-        @click="store.toggleFavorite(post.id)"
+        @click="onFavorite"
       >
         {{ post.favorited ? "★ 已收藏" : "☆ 收藏" }}
       </button>
-      <button class="btn-delete" @click="store.remove(post.id)">删除</button>
+      <button class="btn-delete" @click="onRemove">删除</button>
     </div>
   </li>
 </template>
@@ -31,8 +31,18 @@
 import { usePostsStore } from "../stores/posts";
 import { formatTime } from "../utils/time";
 
-defineProps({
+const props = defineProps({
   post: { type: Object, required: true },
 });
 const store = usePostsStore();
+
+function onLike() {
+  store.toggleLike(props.post.id).catch(() => {});
+}
+function onFavorite() {
+  store.toggleFavorite(props.post.id).catch(() => {});
+}
+function onRemove() {
+  store.remove(props.post.id).catch(() => {});
+}
 </script>
